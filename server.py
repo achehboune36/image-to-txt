@@ -2,9 +2,11 @@ import torch
 import re 
 from transformers import AutoTokenizer, ViTFeatureExtractor, VisionEncoderDecoderModel
 from colabcode import ColabCode
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, File, UploadFile
 from PIL import Image
 import nltk
+import io
+import os
 
 device='cpu'
 encoder_checkpoint = "nlpconnect/vit-gpt2-image-captioning"
@@ -37,14 +39,18 @@ def extract_nouns_verbs(sentence):
 
 app = FastAPI()
 
-@app.get("/")
-async def read_root(image_path: str):
-  try:
-    image = Image.open(image_path)
-    caption = predict(image)
-    nouns, verbs = extract_nouns_verbs(caption)
-  except Exception as e:
-    print(e)
-    return {"message": "image not found!",}
+@app.post("/")
+async def read_root(request: Request, image_file: UploadFile = File(...)):
+    try:
+        with open(image_file.filename, "wb") as buffer:
+            buffer.write(await image_file.read())
+        image = Image.open(image_file.file)
+        caption = predict(image)
+        nouns, verbs = extract_nouns_verbs(caption)
+        
+        os.remove(image_file.filename)
 
-  return {"message": caption, "nouns": nouns, "verbs": verbs}
+        return {"message": caption, "nouns": nouns, "verbs": verbs}
+    except Exception as e:
+        print(e)
+        return {"message": "image processing error"}
