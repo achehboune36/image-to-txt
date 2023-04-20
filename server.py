@@ -35,6 +35,8 @@ def extract_nouns_verbs(sentence):
     
     return nouns, verbs
 
+app = FastAPI()
+
 @app.get("/")
 async def read_root(image_path: str):
   try:
