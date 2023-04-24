@@ -8,7 +8,7 @@ import nltk
 import io
 import os
 
-device='cpu'
+device='cuda'
 encoder_checkpoint = "nlpconnect/vit-gpt2-image-captioning"
 decoder_checkpoint = "nlpconnect/vit-gpt2-image-captioning"
 model_checkpoint = "nlpconnect/vit-gpt2-image-captioning"
